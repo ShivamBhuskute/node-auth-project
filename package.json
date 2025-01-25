@@ -1,23 +1,26 @@
 {
   "name": "auth-project",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000n\u0000o\u0000d\u0000e\u0000-\u0000a\u0000u\u0000t\u0000h\u0000-\u0000p\u0000r\u0000o\u0000j\u0000e\u0000c\u0000t\u0000\r\u0000 \u0000",
+  "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "node --env-file=.env index.js",
-    "dev": "node --watch --trace-warnings --env-file=.env index.js"
+    "start": "node --env-file=.env src/index.js",
+    "dev": "node --watch --trace-warnings --env-file=.env src/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.12.0",
     "mongoose": "^8.9.5",
     "nodemailer": "^6.10.0"
   }
