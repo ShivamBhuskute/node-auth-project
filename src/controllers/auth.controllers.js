@@ -2,9 +2,10 @@ import { signupSchema, signinSchema } from "../middlewares/validator.cjs";
 import { User } from "../models/user.modals.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { doHash, doHashValidation } from "../utils/hashing.js";
+import { doHash, doHashValidation, hmacProcess } from "../utils/hashing.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import { transport } from "../middlewares/sendMail.js";
 
 const signup = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
@@ -84,6 +85,36 @@ const signout = asyncHandler(async (req, res) => {
     );
 });
 
+const verificationCode = asyncHandler(async (req, res) => {
+    const { email } = req.body;
 
+    const existingUser = await User.findOne({ email });
 
-export { signup, signin, signout };
+    if (!existingUser) throw new ApiError(404, "User does not exist");
+
+    if (existingUser.verified) {
+        throw new ApiError(400, "You are already verified");
+    }
+
+    const codeVal = Math.floor(Math.random() * 1000000).toString();
+    let info = await transport.sendMail({
+        from: process.env.NODE_CODE_SENDING_EMAIL_ADDRESS,
+        to: existingUser.email,
+        subject: "verification code",
+        html: "<h1>" + codeVal + "</h1>",
+    });
+
+    if (info.accepted[0] === existingUser.email) {
+        const hashedCodeValue = hmacProcess(
+            codeVal,
+            process.env.HMAC_VERIFICATION_CODE_SECRET
+        );
+        existingUser.verificationCode = hashedCodeValue;
+        existingUser.verificationCodeValidation = Date.now();
+        await existingUser.save();
+        return res.json(new ApiResponse(200, "Code sent successfully"));
+    }
+    throw new ApiError(400, "Error sending code");
+});
+
+export { signup, signin, signout, verificationCode };
